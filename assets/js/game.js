@@ -165,7 +165,8 @@
       reportAttempt(true).then(function (g) {
         var p = document.getElementById("pct");
         if (g && typeof g.percentile === "number" && g.players > 1) {
-          p.innerHTML = "You beat <strong>" + Math.round(g.percentile) + "%</strong> of " + g.players + " players! 🎉";
+          p.innerHTML = "You beat <strong>" + Math.round(g.percentile) + "%</strong> of players! 🎉" +
+            '<br><small class="muted">' + g.players + " people have played so far</small>";
         } else if (g) {
           p.textContent = "You're one of the first players. Share it and see who beats you!";
         }
