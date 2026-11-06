@@ -11,7 +11,7 @@ Static HTML/CSS/JS with no build step, deployed to GitHub Pages.
 | `/videos/` | All videos, read from `data/videos.json` |
 | `/kits/` | Paint-kit shop |
 | `/kits/shark-man/` | Kit 001 page: demo, source cartoon, painting video slot, parent FAQ |
-| `/game/` | The Blindfold Coin Puzzle (interactive) |
+| `/game/` | Shark Man's Treasure Dive: the blindfold coin puzzle, kid-friendly (read-aloud, chests, pearls) |
 | `/about/` | Ethan & Dad |
 
 ## How things update

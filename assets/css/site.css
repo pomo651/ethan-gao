@@ -153,52 +153,83 @@ h2 small { font-size: 18px; color: var(--muted); font-weight: 400; margin-left: 
   .nav ul { gap: 14px; }
 }
 
-/* ---------- /game: Blindfold Coin Puzzle ---------- */
-.g-rules { margin-top: 26px; }
-.g-rules ol { margin: 8px 0 0 22px; }
-.g-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 22px 0; }
-.g-stats div { background: #fff; border: 2.5px solid var(--ink); border-radius: 14px 18px 12px 16px; text-align: center; padding: 8px; font-size: 30px; font-weight: 700; line-height: 1.1; }
-.g-stats small { display: block; font-size: 16px; font-weight: 400; color: var(--muted); }
-.g-board { background: #fff; border: 2.5px solid var(--ink); border-radius: 14px 20px 12px 18px; padding: 18px; }
-.g-step { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
-.g-piles { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.g-pile { border: 2.5px dashed #d1d5db; border-radius: 14px; padding: 10px; min-height: 140px; }
-.g-pile[data-pile="A"] { background: #fff7ed; border-color: #fdba74; }
-.g-pile[data-pile="B"] { background: #f0f9ff; border-color: #93c5fd; }
-.g-pile-h { margin-bottom: 8px; }
-.g-count { color: var(--muted); }
-.g-heads { color: var(--orange); font-weight: 700; }
-.g-coins { display: flex; flex-wrap: wrap; gap: 5px; }
-.g-empty { color: var(--muted); font-size: 16px; padding: 30px 6px; text-align: center; width: 100%; }
-.g-coin { width: 32px; height: 32px; border-radius: 50%; border: 0; padding: 0; position: relative; background: none; touch-action: manipulation; }
-.g-face { position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; border: 2px solid var(--ink); }
-.g-back { background: radial-gradient(circle at 35% 30%, #e5e7eb, #9ca3af); color: #4b5563; }
-.g-front { display: none; }
-.g-front.h { background: radial-gradient(circle at 35% 30%, #fef08a, #eab308); color: #713f12; }
-.g-front.t { background: radial-gradient(circle at 35% 30%, #f3f4f6, #d1d5db); color: #9ca3af; }
-.g-coin:hover .g-back { transform: scale(1.12); }
-.revealed .g-back { display: none; }
-.revealed .g-front { display: flex; animation: gReveal .5s ease-out both; }
-.revealed .g-coin { cursor: default; }
-@keyframes gReveal { from { transform: rotateY(90deg); } to { transform: rotateY(0); } }
-.g-wobble { animation: gWobble .7s ease-in-out both; }
-@keyframes gWobble { 0% { transform: rotateY(0); } 50% { transform: rotateY(180deg) scale(1.15); } 100% { transform: rotateY(360deg); } }
-.g-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
-.g-actions .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-.g-result { margin-top: 24px; text-align: center; }
-.g-result.win { border-color: var(--green); background: #f0fdf4; }
-.g-result.lose { background: #fffbeb; }
-.g-result h2 { margin: 6px 0 10px; }
-.g-big { font-size: 64px; line-height: 1; animation: gPop .6s cubic-bezier(.3,1.6,.5,1) both; }
-@keyframes gPop { from { transform: scale(.2) rotate(-20deg); } to { transform: scale(1) rotate(0); } }
-.g-pct { font-size: 26px; margin-top: 8px; }
-.g-why { text-align: left; margin-top: 14px; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 10px 16px; }
-.g-why summary { cursor: pointer; font-weight: 700; }
+/* ---------- /game: Shark Man's Treasure Dive ---------- */
+.dive { --sea: #0c4a6e; position: relative; overflow: hidden; margin-top: 16px; padding: 26px 26px 30px; border: 3px solid var(--sea); border-radius: 22px; color: var(--sea);
+  background: linear-gradient(#e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%);
+  font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", var(--hand); }
+.dive > * { position: relative; }
+.dive-bub { position: absolute !important; bottom: -24px; border: 2px solid rgba(255,255,255,.9); border-radius: 50%; animation: diveRise 7s linear infinite; }
+@keyframes diveRise { from { transform: translateY(0); opacity: .9; } to { transform: translateY(-600px); opacity: 0; } }
+.dive-t { font-size: 42px; font-weight: 900; line-height: 1.1; color: var(--sea); }
+.dive-goal { font-size: 19px; font-weight: 700; margin: 6px 0 16px; }
+.dive-top { display: flex; align-items: center; gap: 16px; }
+.dive-guide { width: 120px; flex: none; }
+.dive-guide.dance { animation: diveDance .6s ease-in-out 5; }
+@keyframes diveDance { 0%,100% { transform: rotate(0) translateY(0); } 25% { transform: rotate(-12deg) translateY(-12px); } 75% { transform: rotate(12deg) translateY(-12px); } }
+.dive-say { flex: 1; background: #fff; border: 3px solid var(--sea); border-radius: 22px; padding: 12px 18px; font-size: 22px; font-weight: 800; line-height: 1.35; position: relative; min-height: 64px; }
+.dive-say::before { content: ""; position: absolute; left: -16px; top: 24px; border: 8px solid transparent; border-right-color: var(--sea); }
+.dive-read { margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 8px 18px; font-weight: 800; font-size: 18px; border: 3px solid var(--sea); background: #fff; color: var(--sea); }
+.dive-steps { display: flex; gap: 10px; margin: 18px 0; }
+.dive-steps div { flex: 1; background: rgba(255,255,255,.75); border: 3px solid var(--sea); border-radius: 18px; padding: 8px 10px; text-align: center; font-weight: 800; font-size: 17px; opacity: .65; transition: transform .2s, opacity .2s; }
+.dive-steps div span { font-size: 32px; display: block; line-height: 1.15; }
+.dive-steps div.on { background: #fde047; opacity: 1; transform: scale(1.04); }
+.dive-chests { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.dive-chest { background: #92400e; border: 4px solid #451a03; border-radius: 22px 22px 14px 14px; padding: 12px; box-shadow: inset 0 0 0 6px #b45309; }
+.dive-chest-h { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.dive-lbl { background: #fde047; color: #451a03; border: 3px solid #451a03; border-radius: 999px; padding: 2px 14px; font-weight: 900; font-size: 19px; }
+.dive-n { color: #fde68a; font-weight: 900; font-size: 22px; }
+.dive-heads { color: #fef08a; font-weight: 900; font-size: 20px; }
+.dive-coins { display: flex; flex-wrap: wrap; gap: 6px; background: rgba(0,0,0,.2); border-radius: 12px; padding: 8px; min-height: 80px; align-content: flex-start; }
+.dive-empty { color: #fde68a; font-weight: 700; font-size: 17px; padding: 18px 6px; text-align: center; width: 100%; }
+.dive-coin { width: 38px; height: 38px; border-radius: 50%; border: 0; padding: 0; position: relative; background: none; touch-action: manipulation; }
+.dive-face { position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; border: 2.5px solid #1f2937; }
+.dive-back { background: radial-gradient(circle at 35% 30%, #f3f4f6, #9ca3af); color: #374151; transition: transform .15s; }
+.dive-coin:hover .dive-back { transform: scale(1.12) rotate(-8deg); }
+.dive-front { display: none; }
+.dive-front.h { background: radial-gradient(circle at 35% 30%, #fef9c3, #eab308); color: #713f12; box-shadow: 0 0 10px #fde047; }
+.dive-front.t { background: radial-gradient(circle at 35% 30%, #e5e7eb, #9ca3af); opacity: .55; }
+.revealed .dive-back { display: none; }
+.revealed .dive-front { display: flex; animation: diveReveal .5s ease-out both; }
+.revealed .dive-coin { cursor: default; }
+@keyframes diveReveal { from { transform: rotateY(90deg); } to { transform: rotateY(0); } }
+.dive-spin { animation: diveSpin .7s ease-in-out both; }
+@keyframes diveSpin { 0% { transform: rotateY(0); } 50% { transform: rotateY(180deg) scale(1.15); } 100% { transform: rotateY(360deg); } }
+.dive-acts { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+.dive-btn { font-size: 21px; font-weight: 900; border: 4px solid #0c4a6e; border-radius: 18px; padding: 10px 20px; background: #22c55e; color: #fff; box-shadow: 0 6px 0 #0c4a6e; font-family: inherit; }
+.dive-btn.alt { background: #fff; color: #0c4a6e; }
+.dive-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #0c4a6e; }
+.dive-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: 0 6px 0 #0c4a6e; }
+.dive-pearls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-weight: 900; font-size: 19px; margin-top: 18px; }
+.dive-pearls i { width: 24px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #cbd5e1); border: 2px solid #0c4a6e; display: inline-block; }
+.dive-pearls i.got { background: radial-gradient(circle at 35% 30%, #fef9c3, #f59e0b); }
+.dive-pearls small { font-weight: 700; font-size: 15px; opacity: .8; }
+.dive-result { margin-top: 24px; text-align: center; border: 3px solid #0c4a6e; border-radius: 22px; padding: 22px; background: #fff; color: #0c4a6e; }
+.dive-result.win { background: #f0fdf4; border-color: #15803d; }
+.dive-result.lose { background: #fffbeb; }
+.dive-result h2 { margin: 6px 0 10px; }
+.dive-big { font-size: 68px; line-height: 1; animation: divePop .6s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes divePop { from { transform: scale(.2) rotate(-20deg); } to { transform: scale(1) rotate(0); } }
+.dive-pct { font-size: 26px; margin-top: 10px; }
+.dive-meter { height: 24px; max-width: 460px; margin: 8px auto 4px; border: 3px solid #0c4a6e; border-radius: 999px; overflow: hidden; background: #e0f2fe; }
+.dive-meter i { display: block; height: 100%; background: linear-gradient(90deg, #22c55e, #facc15); animation: diveFill 1.2s ease-out both; }
+@keyframes diveFill { from { width: 0; } }
+.dive-why { text-align: left; margin-top: 14px; background: #fff; border: 2px solid #0c4a6e; border-radius: 12px; padding: 10px 16px; }
+.dive-why summary { cursor: pointer; font-weight: 700; }
 .g-confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 60; }
 .g-confetti i { position: absolute; top: -20px; width: 10px; height: 14px; border-radius: 2px; animation-name: gFall; animation-timing-function: linear; animation-fill-mode: forwards; }
 @keyframes gFall { to { top: 105vh; transform: rotate(720deg) translateX(40px); } }
 @media (max-width: 760px) {
-  .g-piles { grid-template-columns: 1fr; }
-  .g-coin { width: 30px; height: 30px; }
+  .dive { padding: 18px 14px 22px; }
+  .dive-t { font-size: 30px; }
+  .dive-guide { width: 78px; }
+  .dive-say { font-size: 18px; }
+  .dive-steps { gap: 6px; }
+  .dive-steps div { font-size: 13px; padding: 6px 4px; }
+  .dive-steps div span { font-size: 24px; }
+  .dive-chests { grid-template-columns: 1fr; }
+  .dive-coin { width: 32px; height: 32px; }
+  .dive-btn { font-size: 18px; padding: 9px 14px; }
+  /* keep the controls in thumb reach while scrolling past 100 coins */
+  .dive-acts { position: sticky; bottom: 0; z-index: 5; margin: 14px -14px 0; padding: 10px 14px 12px; background: rgba(186,230,253,.95); border-top: 3px solid #0c4a6e; }
 }
-@media (prefers-reduced-motion: reduce) { .g-wobble, .revealed .g-front, .g-big { animation: none !important; } .g-confetti { display: none; } }
+@media (prefers-reduced-motion: reduce) { .dive-bub, .dive-spin, .revealed .dive-front, .dive-big, .dive-guide.dance, .dive-meter i { animation: none !important; } .g-confetti { display: none; } }

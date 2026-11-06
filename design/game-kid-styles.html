@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coin Game — Kid-Friendly Styles</title>
+  <style>
+    :root {
+      --bg: #fafaf8;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --border: #e5e7eb;
+      --done: #059669;
+      --progress: #d97706;
+      --blocked: #dc2626;
+      --killed: #6b7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    h1 { font-size: 32px; margin-bottom: 4px; letter-spacing: -0.02em; }
+    h2 { font-size: 22px; margin: 28px 0 14px; letter-spacing: -0.01em; }
+    h3 { font-size: 16px; margin: 16px 0 8px; }
+    h4 { font-size: 14px; margin: 12px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .meta { color: var(--muted); font-size: 14px; margin-top: 8px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .badge-draft { background: #fef3c7; color: #92400e; }
+    .badge-done { background: #d1fae5; color: #065f46; }
+    .badge-progress { background: #fed7aa; color: #9a3412; }
+    .badge-blocked { background: #fee2e2; color: #991b1b; }
+    .badge-killed { background: #e5e7eb; color: #4b5563; }
+    .badge-unknown { background: #ddd6fe; color: #5b21b6; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .north-star {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 16px 0;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin: 12px 0;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { background: #f9fafb; font-weight: 600; font-size: 13px; }
+    .phase {
+      border-left: 4px solid var(--accent);
+      padding: 4px 0 4px 20px;
+      margin: 24px 0;
+    }
+    .phase-header { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+    .phase-title { font-size: 18px; font-weight: 600; }
+    .phase-meta { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+    .scope-list {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0;
+    }
+    .scope-list li {
+      padding: 5px 0 5px 26px;
+      position: relative;
+      font-size: 14px;
+    }
+    .scope-list li::before {
+      position: absolute;
+      left: 0;
+      top: 5px;
+      font-weight: 700;
+    }
+    .scope-in li::before { content: "✓"; color: var(--done); }
+    .scope-out li::before { content: "✗"; color: var(--killed); }
+    .question {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 14px 18px;
+      margin: 12px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .question-q { font-weight: 600; margin-bottom: 6px; font-size: 15px; }
+    .question-rec { color: #4b5563; font-size: 13px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 13px;
+    }
+    .warn-box {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #fee2e2;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #991b1b;
+    }
+    .info-box {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #eff6ff;
+      border-radius: 6px;
+      font-size: 13px;
+      color: #1e40af;
+      border-left: 4px solid #2563eb;
+    }
+    .ascii-box {
+      background: #f3f4f6;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 12px 0;
+    }
+    .verdict-box {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    footer {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 24px 0;
+    }
+    @media (max-width: 720px) {
+      body { padding: 16px 8px; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+  <style>
+    /* ===== Mockup-only styles, scoped under .browser / .swatch so they never leak into the report shell ===== */
+    .grid-2 > * { min-width: 0; }
+    .tscroll { overflow-x: auto; }
+    .browser { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 16px 0; box-shadow: 0 6px 24px rgba(0,0,0,.06); }
+    .browser-bar { background: #f3f4f6; padding: 8px 12px; display: flex; gap: 6px; align-items: center; border-bottom: 1px solid var(--border); }
+    .browser-bar i { width: 10px; height: 10px; border-radius: 50%; background: #d1d5db; display: inline-block; }
+    .browser-bar span { margin-left: 10px; font-size: 12px; color: var(--muted); font-family: ui-monospace, "SF Mono", Menlo, monospace; background: #fff; padding: 2px 10px; border-radius: 6px; }
+    .browser button { font: inherit; cursor: pointer; }
+    .kidfont { font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "Chalkboard SE", -apple-system, sans-serif; }
+
+    /* style swatches (the 6-option overview) */
+    .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+    .swatch { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .swatch .sw-art { height: 120px; display: flex; align-items: center; justify-content: center; font-size: 44px; gap: 6px; position: relative; }
+    .swatch .sw-body { padding: 10px 12px; font-size: 13px; background: #fff; }
+    .swatch .sw-body b { font-size: 15px; display: block; }
+    .sw1 .sw-art { background: linear-gradient(#bae6fd, #38bdf8 70%, #fde68a 70%); }
+    .sw2 .sw-art { background: #fff7ed; border-bottom: 6px solid #fdba74; }
+    .sw3 .sw-art { background: #fef9c3; background-image: repeating-linear-gradient(45deg, #fde047 0 14px, #fef08a 14px 28px); }
+    .sw4 .sw-art { background: radial-gradient(circle at 50% 120%, #c084fc, #ede9fe 70%); }
+    .sw5 .sw-art { background: #ecfccb; }
+    .sw6 .sw-art { background: linear-gradient(#1e3a8a, #6366f1); color: #fff; }
+
+    /* shared coin bits used by all three mockups */
+    .kcoin { width: 48px; height: 48px; border-radius: 50%; border: 3px solid #1f2937; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; background: radial-gradient(circle at 35% 30%, #f3f4f6, #9ca3af); color: #374151; transition: transform .15s; }
+    .kcoin:hover { transform: scale(1.12) rotate(-6deg); }
+    .kcoin.gold { background: radial-gradient(circle at 35% 30%, #fef08a, #eab308); color: #713f12; }
+    .kcoins { display: flex; flex-wrap: wrap; gap: 8px; min-height: 56px; }
+    .readme { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 8px 16px; font-weight: 800; border: 3px solid #1f2937; background: #fff; }
+
+    /* ---------- Mockup A: Shark Man's Treasure Dive ---------- */
+    .mA { background: linear-gradient(#e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%); color: #0c4a6e; padding: 26px 28px 34px; position: relative; overflow: hidden; }
+    .mA .bub { position: absolute; border: 2px solid rgba(255,255,255,.9); border-radius: 50%; animation: rise 7s linear infinite; }
+    @keyframes rise { from { transform: translateY(0); opacity: .9; } to { transform: translateY(-420px); opacity: 0; } }
+    .mA .top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; position: relative; }
+    .mA .guide { width: 120px; flex: none; }
+    .mA .say { background: #fff; border: 3px solid #0c4a6e; border-radius: 22px; padding: 12px 18px; font-size: 22px; font-weight: 800; position: relative; flex: 1; min-width: 220px; }
+    .mA .say::before { content: ""; position: absolute; left: -14px; top: 22px; border: 8px solid transparent; border-right-color: #0c4a6e; }
+    .mA h2.t { font-size: 40px; font-weight: 900; margin: 0 0 6px; color: #0c4a6e; letter-spacing: -0.01em; }
+    .mA .steps { display: flex; gap: 10px; margin: 18px 0; flex-wrap: wrap; position: relative; }
+    .mA .steps div { flex: 1; min-width: 150px; background: rgba(255,255,255,.85); border: 3px solid #0c4a6e; border-radius: 18px; padding: 10px 12px; text-align: center; font-weight: 800; font-size: 16px; }
+    .mA .steps div.on { background: #fde047; transform: scale(1.04); }
+    .mA .steps .e { font-size: 34px; display: block; line-height: 1.1; }
+    .mA .chests { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; position: relative; }
+    .mA .chest { background: #92400e; border: 4px solid #451a03; border-radius: 20px 20px 14px 14px; padding: 12px; box-shadow: inset 0 0 0 6px #b45309; }
+    .mA .chest .lbl { background: #fde047; color: #451a03; border: 3px solid #451a03; border-radius: 999px; display: inline-block; padding: 2px 14px; font-weight: 900; margin-bottom: 10px; font-size: 18px; }
+    .mA .chest .n { color: #fde68a; font-weight: 800; margin-left: 8px; }
+    .mA .chest .kcoins { background: rgba(0,0,0,.18); border-radius: 12px; padding: 8px; }
+    .mA .acts { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; position: relative; }
+    .mA .big { font-size: 22px; font-weight: 900; border: 4px solid #0c4a6e; border-radius: 18px; padding: 12px 22px; background: #22c55e; color: #fff; box-shadow: 0 6px 0 #0c4a6e; }
+    .mA .big.alt { background: #fff; color: #0c4a6e; }
+    .mA .big:active { transform: translateY(4px); box-shadow: 0 2px 0 #0c4a6e; }
+    .mA .pearls { display: flex; gap: 8px; align-items: center; font-weight: 900; font-size: 18px; margin-top: 16px; position: relative; flex-wrap: wrap; }
+    .mA .pearls i { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #cbd5e1); border: 2px solid #0c4a6e; display: inline-block; }
+    .mA .pearls i.got { background: radial-gradient(circle at 35% 30%, #fef9c3, #f59e0b); }
+
+    /* ---------- Mockup B: Storybook Steps (one big step per page) ---------- */
+    .mB { background: #fffaf0; color: #3f2d1d; padding: 28px; font-family: "Chalkboard SE", "Comic Sans MS", ui-rounded, sans-serif; }
+    .mB .book { display: grid; grid-template-columns: 1fr 1fr; background: #fff; border: 3px solid #3f2d1d; border-radius: 10px 22px 22px 10px; box-shadow: 8px 8px 0 #f5d0a9; overflow: hidden; }
+    .mB .pg { padding: 26px; min-height: 360px; position: relative; }
+    .mB .pg.l { background: #fff7ed; border-right: 3px dashed #f5d0a9; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .mB .pic { font-size: 92px; line-height: 1; }
+    .mB .pgno { position: absolute; bottom: 10px; font-size: 14px; color: #a8a29e; }
+    .mB .pg.l .pgno { left: 16px; } .mB .pg.r .pgno { right: 16px; }
+    .mB .words { font-size: 30px; line-height: 1.25; font-weight: 700; }
+    .mB .words em { color: #ea580c; font-style: normal; }
+    .mB .hint { font-size: 18px; color: #78716c; margin-top: 10px; }
+    .mB .dots { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+    .mB .dots i { width: 16px; height: 16px; border-radius: 50%; background: #e7e5e4; border: 2px solid #3f2d1d; }
+    .mB .dots i.on { background: #fb923c; }
+    .mB .turn { display: flex; justify-content: space-between; margin-top: 18px; gap: 12px; }
+    .mB .turn button { font-size: 22px; font-weight: 700; padding: 10px 22px; border-radius: 14px; border: 3px solid #3f2d1d; background: #fff; }
+    .mB .turn .next { background: #fb923c; color: #fff; }
+    .mB .tray { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mB .tray > div { border: 3px dashed #d6d3d1; border-radius: 16px; padding: 10px; }
+    .mB .tray b { display: block; font-size: 18px; margin-bottom: 6px; }
+    .mB .counter { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-size: 20px; font-weight: 700; flex-wrap: wrap; }
+    .mB .counter button:not(.readme) { width: 52px; height: 52px; border-radius: 50%; font-size: 26px; font-weight: 900; border: 3px solid #3f2d1d; background: #fde68a; }
+
+    /* ---------- Mockup C: Game Show ---------- */
+    .mC { background: #fefce8; color: #1e1b4b; padding: 0 0 30px; }
+    .mC .stage { background: radial-gradient(circle at 50% 0, #fef08a, #facc15 60%); border-bottom: 6px solid #1e1b4b; padding: 22px 26px 26px; text-align: center; position: relative; }
+    .mC .lights { display: flex; justify-content: center; gap: 12px; margin-bottom: 10px; }
+    .mC .lights i { width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px #fff; animation: blink 1s infinite alternate; }
+    .mC .lights i:nth-child(even) { animation-delay: .5s; }
+    @keyframes blink { from { opacity: 1; } to { opacity: .25; } }
+    .mC h2.t { font-size: 46px; font-weight: 900; margin: 0; letter-spacing: -0.02em; color: #1e1b4b; text-shadow: 3px 3px 0 #fff; }
+    .mC .sub { font-weight: 800; font-size: 18px; }
+    .mC .score { display: flex; justify-content: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
+    .mC .score div { background: #1e1b4b; color: #fde047; border-radius: 14px; padding: 6px 18px; font-weight: 900; font-size: 26px; min-width: 110px; font-variant-numeric: tabular-nums; }
+    .mC .score small { display: block; font-size: 12px; color: #c7d2fe; letter-spacing: .1em; }
+    .mC .body { padding: 22px 26px 0; }
+    .mC .round { font-weight: 900; font-size: 22px; text-align: center; margin-bottom: 14px; }
+    .mC .round span { background: #ec4899; color: #fff; border-radius: 999px; padding: 2px 14px; margin-right: 8px; }
+    .mC .boards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .mC .board { background: #fff; border: 4px solid #1e1b4b; border-radius: 22px; padding: 12px; box-shadow: 0 8px 0 #1e1b4b; }
+    .mC .board.a { background: #fce7f3; } .mC .board.b { background: #dbeafe; }
+    .mC .board .lbl { font-weight: 900; font-size: 22px; display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .mC .buzzers { display: flex; justify-content: center; gap: 28px; margin-top: 26px; flex-wrap: wrap; }
+    .mC .buzz { width: 140px; height: 140px; border-radius: 50%; border: 5px solid #1e1b4b; font-weight: 900; font-size: 20px; color: #fff; box-shadow: 0 10px 0 #1e1b4b; line-height: 1.1; }
+    .mC .buzz.a { background: radial-gradient(circle at 40% 30%, #f9a8d4, #db2777); }
+    .mC .buzz.b { background: radial-gradient(circle at 40% 30%, #93c5fd, #2563eb); }
+    .mC .buzz:active { transform: translateY(8px); box-shadow: 0 2px 0 #1e1b4b; }
+    .mC .win { margin: 26px auto 0; max-width: 520px; background: #fff; border: 4px solid #1e1b4b; border-radius: 22px; text-align: center; padding: 16px; box-shadow: 0 8px 0 #1e1b4b; }
+    .mC .win .tro { font-size: 56px; line-height: 1; }
+    .mC .win b { font-size: 28px; display: block; }
+    .mC .meter { height: 22px; border: 3px solid #1e1b4b; border-radius: 999px; overflow: hidden; margin: 10px 0 4px; background: #e0e7ff; }
+    .mC .meter i { display: block; height: 100%; width: 82%; background: linear-gradient(90deg, #22c55e, #facc15); }
+
+    @media (max-width: 720px) {
+      .swatches { grid-template-columns: 1fr 1fr; }
+      .mA, .mB { padding: 18px 16px 24px; }
+      .mA h2.t { font-size: 30px; } .mA .guide { width: 84px; } .mA .say { font-size: 18px; }
+      .mA .chests, .mB .book, .mB .tray, .mC .boards { grid-template-columns: 1fr; }
+      .mB .pg.l { border-right: 0; border-bottom: 3px dashed #f5d0a9; min-height: 0; }
+      .mB .pg { min-height: 0; } .mB .words { font-size: 24px; }
+      .mC h2.t { font-size: 32px; } .mC .body { padding: 18px 16px 0; }
+      .mC .buzz { width: 120px; height: 120px; font-size: 17px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .mA .bub, .mC .lights i { animation: none; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Coin Game — Kid-Friendly Styles</h1>
+    <div class="meta">2026-11-06 · For Jason · Page in question: pomo651.github.io/ethan-gao/game</div>
+    <div class="meta"><span class="badge badge-draft">DRAFT</span> 6 directions at a glance → 3 full mockups (tap the coins and buttons) → recommendation</div>
+  </header>
+
+  <div class="section">
+    <h2>1. What makes the current page hard for kids</h2>
+    <table>
+      <tr><th style="width:26%">Today</th><th>Problem for a kid</th><th style="width:34%">Fix (goes into whichever style you pick)</th></tr>
+      <tr><td>5 lines of written rules</td><td>Too much reading; pre-readers can't play at all</td><td>3 picture cards + a <strong>🔊 Read it to me</strong> button (the browser's built-in voice, free)</td></tr>
+      <tr><td>100 tiny 30px coins, tap one at a time</td><td>Small targets, and 10+ taps gets boring</td><td>Bigger coins plus <strong>+1 / +5 / −1</strong> scoop buttons, with a big number counter</td></tr>
+      <tr><td>Grey "Step 1 of 3" line</td><td>Easy to miss what to do next</td><td>A guide character who says each step, and a highlighted step strip</td></tr>
+      <tr><td>Tries / wins / win-rate boxes</td><td>Grown-up dashboard; "52%" means nothing to a young kid</td><td>Stars or pearls collected, and "You beat 82% of players" as a filling bar</td></tr>
+      <tr><td>Win = trophy + text</td><td>Fun, but quiet</td><td>Bigger celebration: character dance, confetti, optional "ta-da" sound (off by default)</td></tr>
+      <tr><td>Lose = "So close!" text</td><td>Can feel like failing</td><td>Friendly retry ("Shark Man thinks you've got this!") and the same escalating hints</td></tr>
+    </table>
+    <div class="info-box">The puzzle rules, stats and "beat X%" backend stay exactly as they are. This is only a re-skin plus the friendlier controls above.</div>
+  </div>
+
+  <div class="section">
+    <h2>2. Six directions at a glance</h2>
+    <div class="swatches">
+      <div class="swatch sw1"><div class="sw-art">🦈🪙🧰</div><div class="sw-body"><b>A · Shark Man's Treasure Dive</b>Underwater. Coins are treasure, piles are two chests, Shark Man guides.</div></div>
+      <div class="swatch sw2"><div class="sw-art">📖🙈</div><div class="sw-body"><b>B · Storybook Steps</b>One big step per "page", huge words, picture on the left.</div></div>
+      <div class="swatch sw3"><div class="sw-art">🎤🔴🔵</div><div class="sw-body"><b>C · Game Show</b>Stage lights, scoreboard, two giant buzzers to flip.</div></div>
+      <div class="swatch sw4"><div class="sw-art">🎩✨</div><div class="sw-body"><b>D · Magic Show</b>You're the magician: "make the heads match" is the trick.</div></div>
+      <div class="swatch sw5"><div class="sw-art">🍪🍪</div><div class="sw-body"><b>E · Cookie Jar</b>Coins become cookies (chocolate side up). Very concrete.</div></div>
+      <div class="swatch sw6"><div class="sw-art">🚀🌙</div><div class="sw-body"><b>F · Space Mission</b>Coins are lights on two spaceships; dark, starry theme.</div></div>
+    </div>
+    <div class="tscroll"><table style="margin-top:18px">
+      <tr><th></th><th>Kid appeal</th><th>Easy to understand</th><th>Fits Ethan's brand</th><th>Verdict</th></tr>
+      <tr><td><strong>A · Treasure Dive</strong></td><td><span class="badge badge-done">High</span></td><td><span class="badge badge-done">High</span> (chests = piles)</td><td><span class="badge badge-done">High</span> (Shark Man)</td><td><span class="badge badge-done">TOP PICK</span></td></tr>
+      <tr><td><strong>B · Storybook</strong></td><td><span class="badge badge-progress">Medium</span></td><td><span class="badge badge-done">Highest</span></td><td><span class="badge badge-done">High</span> (sketchbook feel)</td><td><span class="badge badge-blue">PICK 2</span></td></tr>
+      <tr><td><strong>C · Game Show</strong></td><td><span class="badge badge-done">Highest</span></td><td><span class="badge badge-progress">Medium</span></td><td><span class="badge badge-progress">Medium</span></td><td><span class="badge badge-blue">PICK 3</span></td></tr>
+      <tr><td>D · Magic Show</td><td><span class="badge badge-done">High</span></td><td><span class="badge badge-progress">Medium</span></td><td><span class="badge badge-killed">Low</span></td><td><span class="badge badge-killed">CUT</span> overlaps with C</td></tr>
+      <tr><td>E · Cookie Jar</td><td><span class="badge badge-done">High</span></td><td><span class="badge badge-done">High</span></td><td><span class="badge badge-killed">Low</span></td><td><span class="badge badge-killed">CUT</span> "flip a cookie" drifts from the real coin puzzle</td></tr>
+      <tr><td>F · Space Mission</td><td><span class="badge badge-progress">Medium</span></td><td><span class="badge badge-progress">Medium</span></td><td><span class="badge badge-killed">Low</span></td><td><span class="badge badge-killed">CUT</span> dark theme clashes with the rest of the site</td></tr>
+    </table></div>
+  </div>
+
+  <div class="section">
+    <h2>3. Top 3, mocked up</h2>
+    <p class="meta">Tap a coin to move it between piles, use the +1 / +5 buttons, and try <strong>🔊 Read it to me</strong> (it uses your browser's voice).</p>
+
+    <!-- ===== A ===== -->
+    <div class="phase">
+      <div class="phase-header"><span class="phase-title">Pick A — Shark Man's Treasure Dive</span><span class="badge badge-done">RECOMMENDED</span></div>
+      <div class="phase-meta">Shark Man found 100 coins on the sea floor. Kids sort them into two treasure chests. He talks them through each step, and wins earn pearls.</div>
+    </div>
+    <div class="browser">
+      <div class="browser-bar"><i></i><i></i><i></i><span>pomo651.github.io/ethan-gao/game</span></div>
+      <div class="mA kidfont" data-mock>
+        <i class="bub" style="left:8%;bottom:-20px;width:14px;height:14px"></i><i class="bub" style="left:46%;bottom:-40px;width:10px;height:10px;animation-delay:2s"></i><i class="bub" style="left:88%;bottom:-30px;width:18px;height:18px;animation-delay:4s"></i>
+        <h2 class="t">Shark Man's Treasure Dive</h2>
+        <div class="top">
+          <svg class="guide" viewBox="0 0 240 180" aria-hidden="true"><path d="M108 58 L122 18 L140 60 Z" fill="#3b82f6" stroke="#0c4a6e" stroke-width="3"/><path d="M44 96 L10 62 L22 100 L8 138 Z" fill="#3b82f6" stroke="#0c4a6e" stroke-width="3"/><ellipse cx="118" cy="100" rx="82" ry="50" fill="#3b82f6" stroke="#0c4a6e" stroke-width="3"/><path d="M60 112 Q120 150 186 112 Q160 136 120 138 Q84 138 60 112 Z" fill="#e0f2fe" stroke="#0c4a6e" stroke-width="3"/><circle cx="166" cy="82" r="11" fill="#fff" stroke="#0c4a6e" stroke-width="3"/><circle cx="169" cy="83" r="5" fill="#0c4a6e"/><path d="M172 112 Q184 122 196 110" fill="none" stroke="#0c4a6e" stroke-width="3" stroke-linecap="round"/></svg>
+          <div class="say" data-say="I found 100 coins! 10 are shiny side up, but it's too dark to see. Put some coins in the left chest.">I found 100 coins! 🪙 10 are shiny side up, but it's too dark to see. Put some coins in the <u>left chest</u>.</div>
+        </div>
+        <div style="margin-top:12px"><button class="readme" type="button" data-read>🔊 Read it to me</button></div>
+        <div class="steps">
+          <div class="on"><span class="e">🧰</span>1. Fill the chests</div>
+          <div><span class="e">🔄</span>2. Flip one chest</div>
+          <div><span class="e">🔦</span>3. Turn on the light</div>
+        </div>
+        <div class="chests">
+          <div class="chest"><span class="lbl">Left chest</span><span class="n" data-n="a">0</span><div class="kcoins" data-pile="a"></div></div>
+          <div class="chest"><span class="lbl">Right chest</span><span class="n" data-n="b">16</span><div class="kcoins" data-pile="b"></div></div>
+        </div>
+        <div class="acts">
+          <button class="big alt" type="button" data-add="1">+1 coin</button>
+          <button class="big alt" type="button" data-add="5">+5 coins</button>
+          <button class="big alt" type="button" data-add="-1">−1</button>
+          <button class="big" type="button">Done! →</button>
+        </div>
+        <div class="pearls">Pearls: <i class="got"></i><i class="got"></i><i></i><i></i><i></i> <span style="font-weight:700;font-size:15px">(1 pearl per win)</span></div>
+      </div>
+    </div>
+    <table>
+      <tr><th style="width:30%">Why it works</th><th style="width:30%">Best for</th><th>Watch out</th></tr>
+      <tr><td>A story gives the puzzle a reason. Chests make "two piles" obvious. It uses Ethan's own character.</td><td>Ages ~4–9, and the most shareable with Ethan's viewers</td><td>The most new art. I'd reuse the Shark Man SVG already on the site, so no new art is needed to start.</td></tr>
+    </table>
+
+    <!-- ===== B ===== -->
+    <div class="phase" style="margin-top:40px">
+      <div class="phase-header"><span class="phase-title">Pick B — Storybook Steps</span><span class="badge badge-blue">EASIEST TO FOLLOW</span></div>
+      <div class="phase-meta">Each step is one picture-book spread: a big picture on the left, a few huge words on the right, and a "next page" button. Only one thing to do at a time.</div>
+    </div>
+    <div class="browser">
+      <div class="browser-bar"><i></i><i></i><i></i><span>pomo651.github.io/ethan-gao/game</span></div>
+      <div class="mB" data-mock>
+        <div class="book">
+          <div class="pg l"><div class="pic">🙈</div><div class="hint">You can't peek!</div><span class="pgno">2</span></div>
+          <div class="pg r">
+            <div class="words" data-say="Now make two piles. Tap a coin, or use the plus buttons.">Now make <em>two piles</em>.<br>Tap a coin, or use the <em>+</em> buttons.</div>
+            <div class="tray">
+              <div><b>Pile 1 · <span data-n="a">0</span></b><div class="kcoins" data-pile="a"></div></div>
+              <div><b>Pile 2 · <span data-n="b">16</span></b><div class="kcoins" data-pile="b"></div></div>
+            </div>
+            <div class="counter"><button type="button" data-add="-1">−</button><button type="button" data-add="1">+</button><button type="button" data-add="5" style="width:auto;border-radius:999px;padding:0 16px;font-size:20px">+5</button><button class="readme" type="button" data-read style="font-size:16px">🔊 Read</button></div>
+            <span class="pgno">3</span>
+          </div>
+        </div>
+        <div class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+        <div class="turn"><button type="button">← Back</button><button class="next" type="button">Next page →</button></div>
+      </div>
+    </div>
+    <table>
+      <tr><th style="width:30%">Why it works</th><th style="width:30%">Best for</th><th>Watch out</th></tr>
+      <tr><td>The calmest and clearest. A kid always knows the one thing to do. It matches the current Sketchbook look closely.</td><td>The youngest kids, and parents playing alongside</td><td>Less "game" energy. The piles get less room on each page.</td></tr>
+    </table>
+
+    <!-- ===== C ===== -->
+    <div class="phase" style="margin-top:40px">
+      <div class="phase-header"><span class="phase-title">Pick C — The Coin Flip Show</span><span class="badge badge-unknown">MOST EXCITING</span></div>
+      <div class="phase-meta">A TV game show: blinking stage lights, a scoreboard, two pink/blue boards and two giant buzzers for the one flip. The "beat X%" result shows as a filling meter.</div>
+    </div>
+    <div class="browser">
+      <div class="browser-bar"><i></i><i></i><i></i><span>pomo651.github.io/ethan-gao/game</span></div>
+      <div class="mC kidfont" data-mock>
+        <div class="stage">
+          <div class="lights"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <h2 class="t">THE COIN FLIP SHOW!</h2>
+          <div class="sub">100 coins · 10 heads · eyes closed · ONE flip</div>
+          <div class="score"><div><small>TRIES</small>07</div><div><small>WINS</small>03</div><div><small>STARS</small>⭐⭐⭐</div></div>
+        </div>
+        <div class="body">
+          <div class="round"><span>ROUND 2</span>Hit a buzzer to flip that board!</div>
+          <div class="boards">
+            <div class="board a"><div class="lbl"><span>PINK</span><span data-n="a">0</span></div><div class="kcoins" data-pile="a"></div></div>
+            <div class="board b"><div class="lbl"><span>BLUE</span><span data-n="b">16</span></div><div class="kcoins" data-pile="b"></div></div>
+          </div>
+          <div class="buzzers"><button class="buzz a" type="button">FLIP<br>PINK</button><button class="buzz b" type="button">FLIP<br>BLUE</button></div>
+          <div class="win">
+            <div class="tro">🏆</div><b>WINNER!</b>
+            <div>You beat <strong>82%</strong> of players!</div>
+            <div class="meter"><i></i></div>
+            <div style="font-size:13px">147 people have played</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <table>
+      <tr><th style="width:30%">Why it works</th><th style="width:30%">Best for</th><th>Watch out</th></tr>
+      <tr><td>The highest energy. The buzzers make "one action" physical and fun. Strongest for "beat my score" sharing.</td><td>Ages ~7–12 and challenging friends</td><td>Busier screen. Younger kids may tap a buzzer before they finish splitting. The real build would lock the buzzers until step 2.</td></tr>
+    </table>
+    <p class="meta">The numbers in the scoreboard and win card (07, 03, 82%, 147) are sample values for the mockup.</p>
+  </div>
+
+  <div class="section">
+    <h2>4. Recommendation</h2>
+    <div class="verdict-box">
+      <strong>Pick A, Shark Man's Treasure Dive</strong>, with the kid-friendly fixes from section 1: read-aloud, +1/+5 scoops, bigger coins, pearls for wins, and a friendlier retry.
+      It's the only style that turns the puzzle into a story a young kid can follow, and it makes Shark Man the face of both the paint kit and the game.
+    </div>
+    <div class="question">
+      <div class="question-q">Q. Which one (or which mix, e.g. "A with C's buzzers")?</div>
+      <div class="question-rec">Once you pick, I'll rebuild /game in that style, keep all the current stats and "beat X%", re-run the win/lose play tests and deploy.</div>
+    </div>
+  </div>
+
+  <footer>Ethan Gao site · coin game kid-friendly styles v1 · 2026-11-06</footer>
+</div>
+
+<script>
+  // Mockup interactions only: move coins between piles, scoop buttons, read-aloud.
+  document.querySelectorAll('[data-mock]').forEach(function (m) {
+    var a = m.querySelector('[data-pile="a"]'), b = m.querySelector('[data-pile="b"]');
+    function coin(gold) { var c = document.createElement('button'); c.type = 'button'; c.className = 'kcoin'; c.textContent = '?'; return c; }
+    for (var i = 0; i < 16; i++) b.appendChild(coin());
+    function count() {
+      m.querySelectorAll('[data-n="a"]').forEach(function (n) { n.textContent = a.children.length; });
+      m.querySelectorAll('[data-n="b"]').forEach(function (n) { n.textContent = b.children.length; });
+    }
+    m.addEventListener('click', function (e) {
+      var c = e.target.closest('.kcoin');
+      if (c) { (c.parentNode === a ? b : a).appendChild(c); count(); return; }
+      var add = e.target.closest('[data-add]');
+      if (add) {
+        var n = +add.dataset.add, from = n > 0 ? b : a, to = n > 0 ? a : b;
+        for (var k = 0; k < Math.abs(n) && from.lastElementChild; k++) to.appendChild(from.lastElementChild);
+        count(); return;
+      }
+      var r = e.target.closest('[data-read]');
+      if (r && 'speechSynthesis' in window) {
+        var say = m.querySelector('[data-say]');
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(say.dataset.say); u.rate = 0.9; u.pitch = 1.1;
+        speechSynthesis.speak(u);
+      }
+    });
+    count();
+  });
+</script>
+</body>
+</html>

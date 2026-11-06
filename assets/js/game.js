@@ -1,4 +1,5 @@
-// The Blindfold Coin Puzzle. 100 coins, 10 heads; split into two piles, flip one pile, heads must match.
+// Shark Man's Treasure Dive: the blindfold coin puzzle for kids.
+// 100 coins, 10 shiny (heads). Split into two chests, flip one chest, shiny counts must match.
 (function () {
   var CONFIG = window.SITE_CONFIG || {};
   var TOTAL = 100, HEADS = 10;
@@ -17,10 +18,14 @@
     });
   }
   var stats = load();
-  function paintStats() {
-    document.getElementById("stTries").textContent = stats.tries;
-    document.getElementById("stWins").textContent = stats.wins;
-    document.getElementById("stRate").textContent = stats.tries ? Math.round(100 * stats.wins / stats.tries) + "%" : "–";
+
+  // One pearl per win; show up to 10 and a "+N" after that.
+  function paintPearls() {
+    var shown = Math.max(5, Math.min(stats.wins, 10)), html = "Pearls: ";
+    for (var i = 0; i < shown; i++) html += '<i class="' + (i < stats.wins ? "got" : "") + '"></i>';
+    if (stats.wins > 10) html += " <b>+" + (stats.wins - 10) + "</b>";
+    html += ' <small>' + stats.tries + (stats.tries === 1 ? " dive" : " dives") + " · 1 pearl per win</small>";
+    document.getElementById("pearls").innerHTML = html;
   }
 
   // Shared stats across all players (Supabase RPC). Optional: without it, only this browser's stats show.
@@ -34,6 +39,24 @@
     }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }
 
+  // ---------- Shark Man's voice ----------
+  var sayEl = document.getElementById("say");
+  function say(text) {
+    sayEl.textContent = text;
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+  }
+  var readBtn = document.getElementById("readBtn");
+  if ("speechSynthesis" in window) {
+    readBtn.addEventListener("click", function () {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(sayEl.textContent);
+      u.rate = 0.9; u.pitch = 1.1;
+      speechSynthesis.speak(u);
+    });
+  } else {
+    readBtn.hidden = true;
+  }
+
   // ---------- game state ----------
   var coins, phase, flipped;
   var el = {
@@ -43,11 +66,15 @@
     countB: document.querySelector('[data-count="B"]'),
     headsA: document.querySelector('[data-heads="A"]'),
     headsB: document.querySelector('[data-heads="B"]'),
-    step: document.getElementById("stepText"),
     actions: document.getElementById("actions"),
     result: document.getElementById("result"),
-    board: document.getElementById("board")
+    board: document.getElementById("board"),
+    dive: document.getElementById("dive"),
+    guide: document.getElementById("guide")
   };
+  var NAME = { A: "left chest", B: "right chest" };
+
+  function inPile(p) { return coins.filter(function (c) { return c.pile === p; }); }
 
   function newGame() {
     var heads = {};
@@ -56,61 +83,85 @@
     for (var i = 0; i < TOTAL; i++) coins.push({ id: i, heads: !!heads[i], pile: "B" });
     phase = "split";
     flipped = null;
-    el.board.classList.remove("revealed");
+    el.dive.classList.remove("revealed");
+    el.guide.classList.remove("dance");
     el.result.hidden = true;
     el.headsA.textContent = el.headsB.textContent = "";
+    say("I found 100 coins! 10 are shiny side up, but it's too dark to see. Move some coins into the left chest. Tap a coin, or use the plus buttons.");
     renderCoins();
     renderActions();
   }
 
   function coinHtml(c) {
-    return '<button type="button" class="g-coin" data-id="' + c.id + '" aria-label="Coin">' +
-      '<span class="g-face g-back">?</span>' +
-      '<span class="g-face g-front ' + (c.heads ? "h" : "t") + '">' + (c.heads ? "H" : "T") + "</span></button>";
+    return '<button type="button" class="dive-coin" data-id="' + c.id + '" aria-label="Coin">' +
+      '<span class="dive-face dive-back">?</span>' +
+      '<span class="dive-face dive-front ' + (c.heads ? "h" : "t") + '">' + (c.heads ? "★" : "") + "</span></button>";
   }
 
   function renderCoins() {
-    var a = coins.filter(function (c) { return c.pile === "A"; });
-    var b = coins.filter(function (c) { return c.pile === "B"; });
-    el.coinsA.innerHTML = a.length ? a.map(coinHtml).join("") : '<p class="g-empty">Tap coins in Pile B to move them here</p>';
-    el.coinsB.innerHTML = b.length ? b.map(coinHtml).join("") : '<p class="g-empty">Tap coins in Pile A to move them here</p>';
+    var a = inPile("A"), b = inPile("B");
+    el.coinsA.innerHTML = a.length ? a.map(coinHtml).join("") : '<p class="dive-empty">Empty! Tap coins in the right chest to move them here.</p>';
+    el.coinsB.innerHTML = b.length ? b.map(coinHtml).join("") : '<p class="dive-empty">Empty! Tap coins in the left chest to move them here.</p>';
     el.countA.textContent = a.length + (a.length === 1 ? " coin" : " coins");
     el.countB.textContent = b.length + (b.length === 1 ? " coin" : " coins");
   }
 
   function btn(label, cls, fn) {
     var b = document.createElement("button");
-    b.type = "button"; b.className = "btn " + (cls || ""); b.textContent = label;
+    b.type = "button"; b.className = "dive-btn " + (cls || ""); b.textContent = label;
     b.addEventListener("click", fn);
     el.actions.appendChild(b);
     return b;
   }
 
+  function move(n) {
+    var from = n > 0 ? inPile("B") : inPile("A");
+    for (var i = 0; i < Math.abs(n) && i < from.length; i++) from[from.length - 1 - i].pile = n > 0 ? "A" : "B";
+    renderCoins();
+    renderActions();
+  }
+
+  function setStep(n) {
+    document.querySelectorAll(".dive-steps [data-step]").forEach(function (s) { s.classList.toggle("on", +s.dataset.step === n); });
+  }
+
   function renderActions() {
     el.actions.innerHTML = "";
-    var a = coins.filter(function (c) { return c.pile === "A"; }).length;
+    var a = inPile("A").length;
     if (phase === "split") {
-      el.step.textContent = "Step 1 of 3 · Tap coins to move them between piles (you can feel how many you're holding)";
-      var done = btn("Done splitting →", "", function () { phase = "flip"; renderActions(); });
-      if (a === 0 || a === TOTAL) { done.disabled = true; done.title = "Both piles need at least one coin"; }
-      if (a > 0) btn("Put all back", "alt", function () { coins.forEach(function (c) { c.pile = "B"; }); renderCoins(); renderActions(); });
+      setStep(1);
+      var plus1 = btn("+1 coin", "alt", function () { move(1); });
+      var plus5 = btn("+5 coins", "alt", function () { move(5); });
+      var minus = btn("−1", "alt", function () { move(-1); });
+      plus1.disabled = plus5.disabled = a === TOTAL;
+      minus.disabled = a === 0;
+      var done = btn("Done! →", "", function () {
+        phase = "flip";
+        say("Now you get ONE magic flip! Pick a chest, and I'll flip over every coin in it.");
+        renderActions();
+      });
+      if (a === 0 || a === TOTAL) { done.disabled = true; done.title = "Both chests need at least one coin"; }
     } else if (phase === "flip") {
-      el.step.textContent = "Step 2 of 3 · Your one move: flip every coin in one pile";
-      btn("Flip Pile A", "", function () { doFlip("A"); });
-      btn("Flip Pile B", "", function () { doFlip("B"); });
-      btn("← Change piles", "alt", function () { phase = "split"; renderActions(); });
+      setStep(2);
+      btn("🔄 Flip the left chest", "", function () { doFlip("A"); });
+      btn("🔄 Flip the right chest", "", function () { doFlip("B"); });
+      btn("← Move coins again", "alt", function () {
+        phase = "split";
+        say("Okay! Move coins between the chests, then press Done.");
+        renderActions();
+      });
     } else if (phase === "flipped") {
-      el.step.textContent = "Step 3 of 3 · Pile " + flipped + " is flipped. Ready to look?";
-      btn("Take off the blindfold 👀", "", reveal);
+      setStep(3);
+      btn("🔦 Turn on the light!", "", reveal);
     } else if (phase === "done") {
-      el.step.textContent = "Blindfold off!";
-      btn("Play again ↻", "", newGame);
+      setStep(0);
+      btn("Dive again ↻", "", newGame);
     }
   }
 
-  // Moving coins between piles (only while splitting).
+  // Tapping a coin moves it to the other chest (only while sorting).
   el.board.addEventListener("click", function (e) {
-    var t = e.target.closest(".g-coin");
+    var t = e.target.closest(".dive-coin");
     if (!t || phase !== "split") return;
     var c = coins[+t.dataset.id];
     c.pile = c.pile === "A" ? "B" : "A";
@@ -122,62 +173,70 @@
     flipped = pile;
     coins.forEach(function (c) { if (c.pile === pile) c.heads = !c.heads; });
     phase = "flipped";
-    // Still blindfolded: the flipped pile wobbles but faces stay hidden.
-    document.querySelectorAll('[data-coins="' + pile + '"] .g-coin').forEach(function (n, i) {
+    say("Flip! Every coin in the " + NAME[pile] + " turned over. It's still dark... ready to turn on the light?");
+    // Still dark: the flipped chest's coins spin but faces stay hidden.
+    document.querySelectorAll('[data-coins="' + pile + '"] .dive-coin').forEach(function (n, i) {
       n.style.animationDelay = Math.min(i * 8, 600) + "ms";
-      n.classList.add("g-wobble");
+      n.classList.add("dive-spin");
     });
-    // Re-render faces after the wobble so the reveal shows the post-flip side.
     el.actions.innerHTML = "";
+    // Re-render after the spin so the reveal shows the flipped side.
     setTimeout(function () { renderCoins(); renderActions(); }, 900);
   }
 
   function reveal() {
     phase = "done";
-    var hA = coins.filter(function (c) { return c.pile === "A" && c.heads; }).length;
-    var hB = coins.filter(function (c) { return c.pile === "B" && c.heads; }).length;
-    var nFlipped = coins.filter(function (c) { return c.pile === flipped; }).length;
+    var hA = inPile("A").filter(function (c) { return c.heads; }).length;
+    var hB = inPile("B").filter(function (c) { return c.heads; }).length;
+    var nFlipped = inPile(flipped).length;
     var won = hA === hB;
-    el.board.classList.add("revealed");
-    el.headsA.textContent = "· " + hA + " heads";
-    el.headsB.textContent = "· " + hB + " heads";
+    el.dive.classList.add("revealed");
+    el.headsA.textContent = "★ " + hA + " shiny";
+    el.headsB.textContent = "★ " + hB + " shiny";
 
     stats.tries += 1;
     if (won) { stats.wins += 1; if (stats.firstWinTry === null) stats.firstWinTry = stats.tries; }
     save();
-    paintStats();
+    paintPearls();
     renderActions();
 
     el.result.hidden = false;
-    el.result.className = "g-result card " + (won ? "win" : "lose");
+    el.result.className = "dive-result " + (won ? "win" : "lose");
     if (won) {
-      // A guaranteed win means the flipped pile had exactly as many coins as there are heads.
+      // A guaranteed win means the flipped chest had exactly as many coins as there are shiny coins.
       var lucky = nFlipped !== HEADS;
+      el.guide.classList.add("dance");
+      say(lucky
+        ? "You did it! Both chests have " + hA + " shiny coins. That one was lucky. There's a way to win every single time. Can you find it?"
+        : "WOW! Both chests have " + hA + " shiny coins. You found the treasure! You earned a pearl!");
       el.result.innerHTML =
-        '<div class="g-big">🏆</div><h2>' + (lucky ? "You won! (lucky one 🍀)" : "Good job! You cracked it!") + "</h2>" +
-        "<p>Both piles have <strong>" + hA + " heads</strong>. " +
-        (stats.wins === 1 ? "You solved it on try <strong>#" + stats.tries + "</strong>." : "That's win <strong>#" + stats.wins + "</strong> in " + stats.tries + " tries.") + "</p>" +
-        '<p class="g-pct" id="pct"></p>' +
-        (lucky ? '<p class="muted">You flipped a pile of ' + nFlipped + " coins, so this was luck. There's a way to win <em>every</em> time. Can you find it?</p>"
-               : '<details class="g-why"><summary>Why does this always work?</summary><p>Make one pile exactly 10 coins. If k of them are heads, the other pile has the remaining 10 − k heads. Flip the 10-coin pile: its k heads become tails and its 10 − k tails become heads. Now both piles have 10 − k heads. Every time.</p></details>') +
-        '<p style="margin-top:14px"><button type="button" class="btn alt" id="share">Challenge a friend 📣</button></p>';
+        '<div class="dive-big">🏆</div><h2>' + (lucky ? "You won! (lucky one 🍀)" : "Treasure found! You cracked it!") + "</h2>" +
+        "<p>Both chests have <strong>" + hA + " shiny coins</strong>. " +
+        (stats.wins === 1 ? "You solved it on dive <strong>#" + stats.tries + "</strong>." : "That's pearl <strong>#" + stats.wins + "</strong>!") + "</p>" +
+        '<div id="pct"></div>' +
+        (lucky ? '<p class="muted">You flipped a chest with ' + nFlipped + " coins, so this was luck. Can you find the way that works every time?</p>"
+               : '<details class="dive-why"><summary>Why does this always work?</summary><p>Put exactly 10 coins in one chest. Say 3 of them are shiny. Then the other chest has the other 7 shiny coins. Flip the 10-coin chest: its 3 shiny coins go dull, and its 7 dull coins turn shiny. Now both chests have 7! It works with any number, every time.</p></details>') +
+        '<p style="margin-top:16px"><button type="button" class="dive-btn alt" id="share">Challenge a friend 📣</button></p>';
       confetti();
       reportAttempt(true).then(function (g) {
         var p = document.getElementById("pct");
         if (g && typeof g.percentile === "number" && g.players > 1) {
-          p.innerHTML = "You beat <strong>" + Math.round(g.percentile) + "%</strong> of players! 🎉" +
-            '<br><small class="muted">' + g.players + " people have played so far</small>";
+          var pct = Math.round(g.percentile);
+          p.innerHTML = '<p class="dive-pct">You beat <strong>' + pct + "%</strong> of players! 🎉</p>" +
+            '<div class="dive-meter"><i style="width:' + pct + '%"></i></div>' +
+            '<p class="muted" style="font-size:16px">' + g.players + " people have played so far</p>";
         } else if (g) {
-          p.textContent = "You're one of the first players. Share it and see who beats you!";
+          p.innerHTML = '<p class="dive-pct">You\'re one of the first divers! Share it and see who beats you.</p>';
         }
       });
     } else {
       reportAttempt(false);
+      say("Oh no, the left chest has " + hA + " shiny coins and the right chest has " + hB + ". They don't match. I think you've got this. Try again!");
       el.result.innerHTML =
-        '<div class="g-big">🙈</div><h2>So close! Not this time.</h2>' +
-        "<p>Pile A has <strong>" + hA + "</strong> heads and Pile B has <strong>" + hB + "</strong>. They need to match.</p>" +
+        '<div class="dive-big">🙈</div><h2>Not this time!</h2>' +
+        "<p>Left chest: <strong>" + hA + "</strong> shiny · Right chest: <strong>" + hB + "</strong> shiny. They need to match.</p>" +
         hint() +
-        '<p style="margin-top:14px"><button type="button" class="btn alt" id="share">Challenge a friend 📣</button></p>';
+        '<p style="margin-top:16px"><button type="button" class="dive-btn alt" id="share">Challenge a friend 📣</button></p>';
     }
     var share = document.getElementById("share");
     if (share) share.addEventListener("click", shareGame);
@@ -187,14 +246,14 @@
   function hint() {
     var fails = stats.tries - stats.wins;
     if (stats.wins > 0 || fails < 2) return "";
-    if (fails < 4) return '<p class="dad">Hint: how many heads are there in total? Does that number help you pick a pile size?</p>';
-    return '<p class="dad">Bigger hint: try making Pile A exactly 10 coins. Then think about which pile to flip.</p>';
+    if (fails < 4) return '<p class="dad">Hint: there are 10 shiny coins. Could that number tell you how many coins to put in a chest?</p>';
+    return '<p class="dad">Bigger hint: put exactly 10 coins in the left chest. Then think about which chest to flip.</p>';
   }
 
   function shareGame() {
     var url = location.href.split("#")[0];
-    var text = "100 coins, 10 heads up, you're blindfolded. One flip to make the heads match. Can you solve it?";
-    if (navigator.share) { navigator.share({ title: "Blindfold Coin Puzzle", text: text, url: url }).catch(function () {}); return; }
+    var text = "Shark Man's Treasure Dive: 100 coins, 10 shiny, too dark to see, ONE flip. Can you make the chests match?";
+    if (navigator.share) { navigator.share({ title: "Shark Man's Treasure Dive", text: text, url: url }).catch(function () {}); return; }
     var b = document.getElementById("share");
     (navigator.clipboard ? navigator.clipboard.writeText(text + " " + url) : Promise.reject())
       .then(function () { b.textContent = "Link copied! ✓"; })
@@ -214,6 +273,6 @@
     setTimeout(function () { box.innerHTML = ""; }, 4200);
   }
 
-  paintStats();
+  paintPearls();
   newGame();
 })();

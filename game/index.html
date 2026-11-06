@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Blindfold Coin Puzzle — Ethan's Sketchbook</title>
-  <meta name="description" content="100 coins, 10 heads up, and you're blindfolded. Split them into two piles and flip one pile. Can you make the heads match?">
-  <meta property="og:title" content="Can you beat Ethan's Blindfold Coin Puzzle?">
-  <meta property="og:description" content="100 coins. 10 heads up. You're blindfolded. One flip. Make the heads match.">
+  <title>Shark Man's Treasure Dive — Ethan's Sketchbook</title>
+  <meta name="description" content="100 coins, 10 shiny side up, and it's too dark to see. Sort them into two treasure chests and flip one. Can you make the shiny coins match?">
+  <meta property="og:title" content="Can you solve Shark Man's Treasure Dive?">
+  <meta property="og:description" content="100 coins. 10 shiny side up. Too dark to see. ONE flip. Make the two chests match.">
   <link rel="icon" href="../assets/img/avatar.jpg">
   <link rel="preload" href="../assets/fonts/patrick-hand-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../assets/css/site.css">
@@ -15,42 +15,51 @@
 <div class="wrap">
   <nav data-nav></nav>
 
-  <h1 style="margin-top:20px">The <span class="scribble">Blindfold</span> Coin Puzzle</h1>
-  <div class="bubble">Dad says nobody gets this on the first try. Prove him wrong! 🙈</div>
+  <section class="dive" id="dive">
+    <i class="dive-bub" style="left:6%;width:14px;height:14px"></i>
+    <i class="dive-bub" style="left:44%;width:10px;height:10px;animation-delay:2.4s"></i>
+    <i class="dive-bub" style="left:90%;width:18px;height:18px;animation-delay:4.6s"></i>
 
-  <section class="g-rules card">
-    <b>The rules</b>
-    <ol>
-      <li>There are <strong>100 coins</strong>. Exactly <strong>10 are heads up</strong>, the rest are tails.</li>
-      <li>You're <strong>blindfolded</strong>. You can't tell which coins are heads.</li>
-      <li>Split the coins into <strong>two piles</strong>. Any sizes you like.</li>
-      <li>You get <strong>one move</strong>: flip every coin in <em>one</em> pile.</li>
-      <li>Blindfold off! You win if both piles have the <strong>same number of heads</strong>.</li>
-    </ol>
-  </section>
+    <h1 class="dive-t">Shark Man's Treasure Dive</h1>
+    <p class="dive-goal">🎯 Goal: make <strong>both chests</strong> have the <strong>same number of shiny coins</strong>.</p>
 
-  <section class="g-stats">
-    <div><span id="stTries">0</span><small>tries</small></div>
-    <div><span id="stWins">0</span><small>wins</small></div>
-    <div><span id="stRate">–</span><small>win rate</small></div>
-  </section>
+    <div class="dive-top">
+      <svg class="dive-guide" id="guide" viewBox="0 0 240 180" aria-hidden="true">
+        <path d="M108 58 L122 18 L140 60 Z" fill="#3b82f6" stroke="#0c4a6e" stroke-width="3"/>
+        <path d="M44 96 L10 62 L22 100 L8 138 Z" fill="#3b82f6" stroke="#0c4a6e" stroke-width="3"/>
+        <ellipse cx="118" cy="100" rx="82" ry="50" fill="#3b82f6" stroke="#0c4a6e" stroke-width="3"/>
+        <path d="M60 112 Q120 150 186 112 Q160 136 120 138 Q84 138 60 112 Z" fill="#e0f2fe" stroke="#0c4a6e" stroke-width="3"/>
+        <circle cx="166" cy="82" r="11" fill="#fff" stroke="#0c4a6e" stroke-width="3"/>
+        <circle cx="169" cy="83" r="5" fill="#0c4a6e"/>
+        <path d="M172 112 Q184 122 196 110" fill="none" stroke="#0c4a6e" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <div class="dive-say" id="say" aria-live="polite"></div>
+    </div>
+    <button class="dive-read" type="button" id="readBtn">🔊 Read it to me</button>
 
-  <section class="g-board" id="board">
-    <div class="g-step" id="stepText">Step 1 of 3 · Tap coins to move them between piles</div>
-    <div class="g-piles">
-      <div class="g-pile" data-pile="A">
-        <div class="g-pile-h"><b>Pile A</b> <span class="g-count" data-count="A">0 coins</span> <span class="g-heads" data-heads="A"></span></div>
-        <div class="g-coins" data-coins="A"><p class="g-empty">Tap coins in Pile B to move them here</p></div>
+    <div class="dive-steps">
+      <div data-step="1"><span>🧰</span>1. Fill the chests</div>
+      <div data-step="2"><span>🔄</span>2. Flip one chest</div>
+      <div data-step="3"><span>🔦</span>3. Turn on the light</div>
+    </div>
+
+    <div class="dive-chests" id="board">
+      <div class="dive-chest">
+        <div class="dive-chest-h"><span class="dive-lbl">Left chest</span> <span class="dive-n" data-count="A">0 coins</span> <span class="dive-heads" data-heads="A"></span></div>
+        <div class="dive-coins" data-coins="A"></div>
       </div>
-      <div class="g-pile" data-pile="B">
-        <div class="g-pile-h"><b>Pile B</b> <span class="g-count" data-count="B">100 coins</span> <span class="g-heads" data-heads="B"></span></div>
-        <div class="g-coins" data-coins="B"></div>
+      <div class="dive-chest">
+        <div class="dive-chest-h"><span class="dive-lbl">Right chest</span> <span class="dive-n" data-count="B">100 coins</span> <span class="dive-heads" data-heads="B"></span></div>
+        <div class="dive-coins" data-coins="B"></div>
       </div>
     </div>
-    <div class="g-actions" id="actions"></div>
+
+    <div class="dive-acts" id="actions"></div>
+
+    <div class="dive-pearls" id="pearls"></div>
   </section>
 
-  <section class="g-result" id="result" hidden></section>
+  <section class="dive-result" id="result" hidden></section>
 
   <p class="dad" style="margin-top:34px">You can try this with real coins too. Grab some from the jar, close your eyes, and have someone check.</p>
 
