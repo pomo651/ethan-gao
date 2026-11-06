@@ -30,7 +30,7 @@
 
   // Shared stats across all players (Supabase RPC). Optional: without it, only this browser's stats show.
   function reportAttempt(won) {
-    var s = CONFIG.gameStats;
+    var s = CONFIG.supabase;
     if (!s || !s.url || !s.anonKey) return Promise.resolve(null);
     return fetch(s.url.replace(/\/$/, "") + "/rest/v1/rpc/record_coin_attempt", {
       method: "POST",

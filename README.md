@@ -23,8 +23,22 @@ Static HTML/CSS/JS with no build step, deployed to GitHub Pages.
 
 Every "Get the kit" button opens a 4-step checkout: paper size → name + email → review (price shown) → "Thank you for supporting Ethan! This kit is free. We'll email it within 24 hours." No payment is ever taken and no card fields exist.
 
-Orders are sent to `orderEndpoint` in `assets/js/config.js` as a JSON POST (`kit`, `paper`, `name`, `email`, `listedPrice`, `placedAt`).
-**While `orderEndpoint` is empty, orders are not saved anywhere.** A Formspree form URL works as-is.
+"Complete order" saves the order (name, email, kit, paper size, listed price) to `site.orders` in Supabase via `site_place_order`. If saving fails, the buyer sees an error and can retry; the thank-you screen only shows once it is saved.
+After emailing a kit, mark it sent: `update site.orders set emailed_at = now() where id = ...`.
+
+## Traffic and conversion
+
+Every page load and checkout step is logged to `site.events` (Supabase) with an anonymous random id per browser. No cookies, no third-party tracker.
+
+| Event | When |
+|---|---|
+| `pageview` | any page loads (with outside referrer, if any) |
+| `kit_buy_click` | a "Get the kit" button is clicked |
+| `checkout_details` | a valid name + email is entered (step 2 → review) |
+| `order_placed` | the order is saved |
+
+Run `scripts/stats.sh [DAYS]` (default 30) for visitors, top pages, referrers, the kit funnel with conversion rates, and the order list. Needs the Supabase CLI logged in.
+Open any page with `?notrack` once to stop counting your own browser (`?track` undoes it).
 
 ## Kit art
 
@@ -41,5 +55,7 @@ python3 -m http.server 8000   # then open http://localhost:8000
 ## Game stats (`/game/`)
 
 Each player's tries and wins are kept in their browser (`localStorage`). "You beat X% of players" needs shared storage:
-They live in the **family-fridge** Supabase project (ref `yvzsdncrpccxqbswemnt`), schema `coin_game`, applied from `supabase/migrations/20261106120000_coin_game_stats.sql` (not part of family-fridge's own migration history). The site calls `record_coin_attempt` using `gameStats` in `assets/js/config.js`.
+They live in the **family-fridge** Supabase project (ref `yvzsdncrpccxqbswemnt`), schema `coin_game`, applied from `supabase/migrations/20261106120000_coin_game_stats.sql` (not part of family-fridge's own migration history). The site calls `record_coin_attempt` using `supabase` in `assets/js/config.js`.
+
+Orders and traffic (schema `site`) are in the same project, from `supabase/migrations/20261106130000_site_orders_and_traffic.sql`. In both schemas the tables have RLS on and no policies, so the browser can only call the RPCs, never read the data.
 X% = share of other players who haven't won yet or needed more tries for their first win.

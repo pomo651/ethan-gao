@@ -19,6 +19,43 @@
     footEl.className = "foot";
     footEl.innerHTML = 'Made with crayons &amp; code by Ethan + Dad · <a href="' + CONFIG.channelUrl + '" target="_blank" rel="noopener">YouTube @eethangaoo</a>';
   }
+  // ---------- Traffic: one anonymous id per browser, saved in Supabase (schema site) ----------
+  // Visit any page with ?notrack to stop counting this browser (e.g. Dad's own visits), ?track to undo.
+  function rpc(name, body) {
+    var s = CONFIG.supabase;
+    if (!s || !s.url || !s.anonKey) return Promise.resolve(null);
+    return fetch(s.url.replace(/\/$/, "") + "/rest/v1/rpc/" + name, {
+      method: "POST",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", apikey: s.anonKey, Authorization: "Bearer " + s.anonKey },
+      body: JSON.stringify(body)
+    }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.status === 204 ? null : r.json(); });
+  }
+  function uuid() {
+    return crypto.randomUUID ? crypto.randomUUID() : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, function (c) {
+      return (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16);
+    });
+  }
+  function stored(store, key) {
+    try { var v = store.getItem(key); if (!v) { v = uuid(); store.setItem(key, v); } return v; } catch (e) { return uuid(); }
+  }
+  var VISITOR = stored(localStorage, "ethan-visitor"), SESSION = stored(sessionStorage, "ethan-session");
+  var NOTRACK = false;
+  try {
+    if (/[?&]notrack\b/.test(location.search)) localStorage.setItem("ethan-notrack", "1");
+    if (/[?&]track\b/.test(location.search)) localStorage.removeItem("ethan-notrack");
+    NOTRACK = localStorage.getItem("ethan-notrack") === "1";
+  } catch (e) {}
+  function track(event, kit) {
+    if (NOTRACK) return;
+    rpc("site_track", {
+      p_visitor: VISITOR, p_session: SESSION, p_event: event, p_path: location.pathname,
+      p_referrer: event === "pageview" && document.referrer.indexOf(location.origin) !== 0 ? document.referrer : null,
+      p_kit: kit || null
+    }).catch(function () {});
+  }
+  track("pageview");
+
   if (document.querySelector("[data-buy]")) {
     document.body.insertAdjacentHTML("beforeend",
       '<div class="co-back" id="co"><form class="co" role="dialog" aria-modal="true" aria-labelledby="coTitle" novalidate>' +
@@ -27,7 +64,7 @@
       '<label class="opt"><input type="radio" name="paper" value="US Letter" checked> US Letter</label>' +
       '<label class="opt"><input type="radio" name="paper" value="A4"> A4</label></div>' +
       '<div data-step="2" hidden><label for="coName">Your name</label><input type="text" id="coName" autocomplete="given-name" placeholder="e.g. Sarah">' +
-      '<label for="coEmail">Email (we send the kit here)</label><input type="email" id="coEmail" autocomplete="email" placeholder="you@example.com"></div>' +
+      '<label for="coEmail">Email (we send the kit here)</label><input type="email" id="coEmail" autocomplete="email" placeholder="you@example.com"><p class="fine">We only use your email to send the kit. No spam.</p></div>' +
       '<div data-step="3" hidden><div class="line"><span id="rvKit"></span><span id="rvPrice"></span></div>' +
       '<div class="line"><span>Delivery</span><span>Email (PDF)</span></div>' +
       '<div class="line total"><span>Total</span><span id="rvTotal"></span></div><p class="fine" id="rvTo"></p></div>' +
@@ -117,6 +154,7 @@
   }
   function open(btn) {
     order = { kit: btn.dataset.kit, price: +btn.dataset.price };
+    track("kit_buy_click", order.kit);
     document.getElementById("coTitle").textContent = order.kit;
     back.classList.add("on");
     show(1);
@@ -129,13 +167,12 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && back.classList.contains("on")) close(); });
   box.addEventListener("submit", function (e) { e.preventDefault(); nextBtn.click(); });
 
+  // Saves name + email to site.orders (Supabase). Not configured = nothing is saved.
   function submitOrder() {
-    if (!CONFIG.orderEndpoint) return Promise.resolve();
-    return fetch(CONFIG.orderEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ kit: order.kit, paper: order.paper, name: order.name, email: order.email, listedPrice: order.price, placedAt: new Date().toISOString() })
-    }).then(function (r) { if (!r.ok) throw new Error(r.status); });
+    return rpc("site_place_order", {
+      p_visitor: VISITOR, p_session: SESSION, p_path: location.pathname, p_kit: order.kit,
+      p_paper: order.paper, p_name: order.name, p_email: order.email, p_price: order.price
+    });
   }
 
   nextBtn.addEventListener("click", function () {
@@ -150,6 +187,7 @@
       document.getElementById("rvPrice").textContent = price;
       document.getElementById("rvTotal").textContent = price;
       document.getElementById("rvTo").textContent = "Your kit will be sent to " + order.email;
+      track("checkout_details", order.kit);
     } else if (step === 3) {
       nextBtn.disabled = true;
       nextBtn.textContent = "Placing order…";
