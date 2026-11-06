@@ -7,7 +7,8 @@ window.SITE_CONFIG = {
   // Empty = orders are NOT saved anywhere; the checkout still runs end to end.
   orderEndpoint: "",
 
-  // Shared stats for /game ("you beat X% of players"). Supabase project URL + anon (public) key.
+  // Shared stats for /game ("you beat X% of players"). Lives in the family-fridge Supabase project,
+  // schema coin_game (see supabase/migrations/). The publishable key is public by design.
   // Empty = each player only sees their own tries and wins.
-  gameStats: { url: "", anonKey: "" }
+  gameStats: { url: "https://yvzsdncrpccxqbswemnt.supabase.co", anonKey: "sb_publishable_Rn8_9zPggfMFJJMdPb32xA_ou4L5cGn" }
 };

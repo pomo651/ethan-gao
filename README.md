@@ -41,5 +41,5 @@ python3 -m http.server 8000   # then open http://localhost:8000
 ## Game stats (`/game/`)
 
 Each player's tries and wins are kept in their browser (`localStorage`). "You beat X% of players" needs shared storage:
-apply `supabase/migrations/20261106120000_coin_game_stats.sql` to a Supabase project, then set `gameStats.url` and `gameStats.anonKey` in `assets/js/config.js`.
+They live in the **family-fridge** Supabase project (ref `yvzsdncrpccxqbswemnt`), schema `coin_game`, applied from `supabase/migrations/20261106120000_coin_game_stats.sql` (not part of family-fridge's own migration history). The site calls `record_coin_attempt` using `gameStats` in `assets/js/config.js`.
 X% = share of other players who haven't won yet or needed more tries for their first win.
