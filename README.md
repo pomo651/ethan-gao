@@ -24,7 +24,7 @@ Static HTML/CSS/JS with no build step, deployed to GitHub Pages.
 Every "Get the kit" button opens a 4-step checkout: paper size → name + email → review (price shown) → "Thank you for supporting Ethan! This kit is free. We'll email it within 24 hours." No payment is ever taken and no card fields exist.
 
 "Complete order" saves the order (name, email, kit, paper size, listed price) to `site.orders` in Supabase via `site_place_order`. If saving fails, the buyer sees an error and can retry; the thank-you screen only shows once it is saved.
-After emailing a kit, mark it sent: `update site.orders set emailed_at = now() where id = ...`.
+After emailing a kit, tick “Sent” on /admin/.
 
 ## Traffic and conversion
 
@@ -37,7 +37,9 @@ Every page load and checkout step is logged to `site.events` (Supabase) with an 
 | `checkout_details` | a valid name + email is entered (step 2 → review) |
 | `order_placed` | the order is saved |
 
-Run `scripts/stats_report.py [DAYS]` (default 30) to build and open `reports/stats.html`: visitors, top pages, referrers, the kit funnel with conversion rates, and the order list. `reports/` is git-ignored because it lists buyers' emails. `scripts/stats.sh [DAYS]` prints the same numbers in the terminal. Both need the Supabase CLI logged in.
+**See it at [/admin/](https://pomo651.github.io/ethan-gao/admin/)** (not linked from the site). It asks for a passphrase, which the database checks (`site_admin_report`); without it nothing loads. It shows yesterday, today, the funnel, traffic and orders, with a “Sent” tickbox per order. Opening it also stops counting that browser. Change the passphrase with `update site.admin_key set hash = extensions.crypt('NEW', extensions.gen_salt('bf'));` (migration `20261106140000_site_admin.sql`).
+
+Offline alternatives: run `scripts/stats_report.py [DAYS]` (default 30) to build and open `reports/stats.html`: visitors, top pages, referrers, the kit funnel with conversion rates, and the order list. `reports/` is git-ignored because it lists buyers' emails. `scripts/stats.sh [DAYS]` prints the same numbers in the terminal. Both need the Supabase CLI logged in.
 Open any page with `?notrack` once to stop counting your own browser (`?track` undoes it).
 
 ## Kit art
