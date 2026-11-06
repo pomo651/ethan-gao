@@ -37,7 +37,7 @@ Every page load and checkout step is logged to `site.events` (Supabase) with an 
 | `checkout_details` | a valid name + email is entered (step 2 → review) |
 | `order_placed` | the order is saved |
 
-Run `scripts/stats.sh [DAYS]` (default 30) for visitors, top pages, referrers, the kit funnel with conversion rates, and the order list. Needs the Supabase CLI logged in.
+Run `scripts/stats_report.py [DAYS]` (default 30) to build and open `reports/stats.html`: visitors, top pages, referrers, the kit funnel with conversion rates, and the order list. `reports/` is git-ignored because it lists buyers' emails. `scripts/stats.sh [DAYS]` prints the same numbers in the terminal. Both need the Supabase CLI logged in.
 Open any page with `?notrack` once to stop counting your own browser (`?track` undoes it).
 
 ## Kit art
