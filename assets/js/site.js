@@ -6,7 +6,7 @@
   // ---------- Shared layout: nav, footer, checkout (one copy for every page) ----------
   var navEl = document.querySelector("[data-nav]");
   if (navEl) {
-    var links = [["videos", "Videos"], ["kits", "Paint Kits"], ["about", "About us"]];
+    var links = [["videos", "Videos"], ["kits", "Paint Kits"], ["game", "Game"], ["about", "About us"]];
     navEl.className = "nav";
     navEl.innerHTML = '<a class="logo" href="' + ROOT + '">Ethan<b>\'s</b> Sketchbook</a><ul>' +
       links.map(function (l) {

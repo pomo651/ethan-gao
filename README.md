@@ -11,6 +11,7 @@ Static HTML/CSS/JS with no build step, deployed to GitHub Pages.
 | `/videos/` | All videos, read from `data/videos.json` |
 | `/kits/` | Paint-kit shop |
 | `/kits/shark-man/` | Kit 001 page: demo, source cartoon, painting video slot, parent FAQ |
+| `/game/` | The Blindfold Coin Puzzle (interactive) |
 | `/about/` | Ethan & Dad |
 
 ## How things update
@@ -36,3 +37,9 @@ python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
 `design/` holds the original design-directions page and is not deployed.
+
+## Game stats (`/game/`)
+
+Each player's tries and wins are kept in their browser (`localStorage`). "You beat X% of players" needs shared storage:
+apply `supabase/migrations/20261106120000_coin_game_stats.sql` to a Supabase project, then set `gameStats.url` and `gameStats.anonKey` in `assets/js/config.js`.
+X% = share of other players who haven't won yet or needed more tries for their first win.

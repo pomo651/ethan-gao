@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Blindfold Coin Puzzle — Ethan's Sketchbook</title>
+  <meta name="description" content="100 coins, 10 heads up, and you're blindfolded. Split them into two piles and flip one pile. Can you make the heads match?">
+  <meta property="og:title" content="Can you beat Ethan's Blindfold Coin Puzzle?">
+  <meta property="og:description" content="100 coins. 10 heads up. You're blindfolded. One flip. Make the heads match.">
+  <link rel="icon" href="../assets/img/avatar.jpg">
+  <link rel="preload" href="../assets/fonts/patrick-hand-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-page="game">
+<div class="wrap">
+  <nav data-nav></nav>
+
+  <h1 style="margin-top:20px">The <span class="scribble">Blindfold</span> Coin Puzzle</h1>
+  <div class="bubble">Dad says nobody gets this on the first try. Prove him wrong! 🙈</div>
+
+  <section class="g-rules card">
+    <b>The rules</b>
+    <ol>
+      <li>There are <strong>100 coins</strong>. Exactly <strong>10 are heads up</strong>, the rest are tails.</li>
+      <li>You're <strong>blindfolded</strong>. You can't tell which coins are heads.</li>
+      <li>Split the coins into <strong>two piles</strong>. Any sizes you like.</li>
+      <li>You get <strong>one move</strong>: flip every coin in <em>one</em> pile.</li>
+      <li>Blindfold off! You win if both piles have the <strong>same number of heads</strong>.</li>
+    </ol>
+  </section>
+
+  <section class="g-stats">
+    <div><span id="stTries">0</span><small>tries</small></div>
+    <div><span id="stWins">0</span><small>wins</small></div>
+    <div><span id="stRate">–</span><small>win rate</small></div>
+  </section>
+
+  <section class="g-board" id="board">
+    <div class="g-step" id="stepText">Step 1 of 3 · Tap coins to move them between piles</div>
+    <div class="g-piles">
+      <div class="g-pile" data-pile="A">
+        <div class="g-pile-h"><b>Pile A</b> <span class="g-count" data-count="A">0 coins</span> <span class="g-heads" data-heads="A"></span></div>
+        <div class="g-coins" data-coins="A"><p class="g-empty">Tap coins in Pile B to move them here</p></div>
+      </div>
+      <div class="g-pile" data-pile="B">
+        <div class="g-pile-h"><b>Pile B</b> <span class="g-count" data-count="B">100 coins</span> <span class="g-heads" data-heads="B"></span></div>
+        <div class="g-coins" data-coins="B"></div>
+      </div>
+    </div>
+    <div class="g-actions" id="actions"></div>
+  </section>
+
+  <section class="g-result" id="result" hidden></section>
+
+  <p class="dad" style="margin-top:34px">You can try this with real coins too. Grab some from the jar, close your eyes, and have someone check.</p>
+
+  <footer data-foot></footer>
+</div>
+<div class="g-confetti" id="confetti" aria-hidden="true"></div>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/game.js"></script>
+</body>
+</html>
